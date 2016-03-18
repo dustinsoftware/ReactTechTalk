@@ -6,34 +6,29 @@ export default class GifSearch extends React.Component {
     super(props);
 
     this.state = {
-      searchResults: []
+      gifs: []
     };
   }
 
-  fetchGifs(searchTerm) {
-    setTimeout(() => {
-      this.setState({
-        searchResults: [
-          {
-            animated: 'https://media.giphy.com/media/mzo0KpdmtnyCI/giphy.gif',
-            static: 'https://media2.giphy.com/media/mzo0KpdmtnyCI/200_s.gif'
-          },
-          {
-            animated: 'https://media.giphy.com/media/mzo0KpdmtnyCI/giphy.gif',
-            static: 'https://media2.giphy.com/media/mzo0KpdmtnyCI/200_s.gif'
-          },
-          {
-            animated: 'https://media.giphy.com/media/mzo0KpdmtnyCI/giphy.gif',
-            static: 'https://media2.giphy.com/media/mzo0KpdmtnyCI/200_s.gif'
-          },
-        ]
-      })
-    }, 500);
+  fetchGifs() {
+    const searchTerm = this.refs.searchbox.getDOMNode().value;
+    this.setState({
+      searchTerm
+    });
+    
+    const apiKey = '';
+    fetch(`//api.giphy.com/v1/gifs/search?api_key=${apiKey}&q=${searchTerm}&rating=g`)
+      .then(response => response.json())
+      .then(response => {
+        this.setState({
+          gifs: response.data
+        })
+      });
   }
 
-  renderSearchResult(result) {
+  renderSearchResult(gif) {
     return (
-      <GifResult staticImage={result.static} animatedImage={result.animated} />
+      <GifResult staticImage={gif.images.downsized_still.url} animatedImage={gif.images.downsized.url} />
     );
   }
 
@@ -42,13 +37,13 @@ export default class GifSearch extends React.Component {
       <div>
         <h1>Gif search demo!</h1>
 
+        Search: <input type="text" ref="searchbox"/>
+        <button onClick={() => this.fetchGifs()}>Search for gifs</button>
         <ul>
-          {this.state.searchResults.map(this.renderSearchResult)}
+          {this.state.gifs.map(this.renderSearchResult)}
         </ul>
 
-        <button onClick={() => this.fetchGifs()}>Search for gifs</button>
-
-        {this.state.searchResults.length === 0 ? 'No images found' : null}
+        {this.state.searchTerm != null && this.state.gifs.length === 0 ? 'No images found' : null}
       </div>
     );
   }
